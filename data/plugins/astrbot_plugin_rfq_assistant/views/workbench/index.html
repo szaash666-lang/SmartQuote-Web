@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>询价选型工作台</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <div class="eyebrow">RFQ ASSISTANT</div>
+            <h1>询价选型工作台</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="demo-badge"><i></i> 离心泵演示库</span>
+          <button class="button ghost" id="catalogButton" type="button">
+            产品目录
+          </button>
+          <button class="button primary" id="newCaseButton" type="button">
+            <span aria-hidden="true">＋</span> 新建询价
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="case-rail">
+          <div class="rail-head">
+            <div>
+              <p class="eyebrow">INQUIRIES</p>
+              <h2>询价任务</h2>
+            </div>
+            <span class="count-pill" id="caseCount">0</span>
+          </div>
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="caseSearch" type="search" placeholder="搜索编号、客户或项目" />
+          </label>
+          <div class="status-filters" id="statusFilters" aria-label="状态筛选">
+            <button class="filter-chip active" data-status="" type="button">全部</button>
+            <button class="filter-chip" data-status="needs_clarification" type="button">待补充</button>
+            <button class="filter-chip" data-status="awaiting_sales_confirmation" type="button">待确认</button>
+            <button class="filter-chip" data-status="awaiting_technical_review" type="button">待审批</button>
+            <button class="filter-chip" data-status="approved_for_export" type="button">可导出</button>
+          </div>
+          <div class="case-list" id="caseList"></div>
+        </aside>
+
+        <section class="case-stage" id="caseStage">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-illustration" aria-hidden="true">
+              <span class="sheet one"></span><span class="sheet two"></span>
+              <span class="magnifier"></span>
+            </div>
+            <p class="eyebrow">START HERE</p>
+            <h2>从一份询价开始</h2>
+            <p>输入客户原话，助手会先找出缺失参数，再用确定性规则生成候选方案。</p>
+            <button class="button primary" data-action="open-create" type="button">新建询价</button>
+          </div>
+
+          <div class="case-content hidden" id="caseContent">
+            <div class="case-titlebar">
+              <div>
+                <div class="title-meta">
+                  <span class="status-badge" id="caseStatus"></span>
+                  <span id="caseRevision"></span>
+                </div>
+                <h2 id="caseTitle">—</h2>
+                <p id="caseSubtitle">—</p>
+              </div>
+              <div class="case-actions">
+                <button class="button ghost" id="analyzeButton" type="button">重新分析</button>
+                <button class="button success" id="exportButton" type="button" disabled>
+                  导出 Excel
+                </button>
+              </div>
+            </div>
+
+            <nav class="tabs" aria-label="询价工作区">
+              <button class="tab active" data-tab="requirements" type="button">需求确认</button>
+              <button class="tab" data-tab="solutions" type="button">方案对比 <span id="solutionCount">0</span></button>
+              <button class="tab" data-tab="evidence" type="button">证据与审批</button>
+            </nav>
+
+            <div class="tab-panel active" id="panel-requirements">
+              <div class="notice warning" id="missingNotice"></div>
+              <div class="content-grid requirements-grid">
+                <div class="stack">
+                  <article class="panel-card">
+                    <div class="card-heading">
+                      <div>
+                        <p class="eyebrow">SOURCE</p>
+                        <h3>客户原始资料</h3>
+                      </div>
+                      <label class="button compact ghost file-button">
+                        上传附件
+                        <input id="attachmentInput" type="file" accept=".pdf,.docx,.xlsx,.xls,.md,.txt" />
+                      </label>
+                    </div>
+                    <div class="source-copy" id="sourceText"></div>
+                    <div class="attachment-list" id="attachmentList"></div>
+                    <p class="microcopy">支持 PDF、DOCX、XLSX、XLS、Markdown、TXT；单个文件不超过 10 MB。</p>
+                  </article>
+
+                  <article class="panel-card">
+                    <div class="card-heading">
+                      <div>
+                        <p class="eyebrow">CLARIFICATION</p>
+                        <h3>客户补充信息</h3>
+                      </div>
+                    </div>
+                    <textarea id="clarificationText" rows="4" placeholder="例如：介质为 40°C 清水，50 Hz，室内安装。"></textarea>
+                    <p class="microcopy">补充信息会与历史原文合并，并生成新的可追溯修订版。</p>
+                  </article>
+                </div>
+
+                <article class="panel-card requirement-card">
+                  <div class="card-heading">
+                    <div>
+                      <p class="eyebrow">REQUIREMENTS</p>
+                      <h3>结构化需求</h3>
+                    </div>
+                    <span class="legend"><i class="required-dot"></i> 必填项</span>
+                  </div>
+                  <div class="requirements-form" id="requirementsForm"></div>
+                  <div class="sticky-actions">
+                    <span class="save-hint" id="saveHint">修改字段后生成新修订</span>
+                    <button class="button primary" id="saveRequirementsButton" type="button">保存并重新选型</button>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="panel-solutions">
+              <div class="disclaimer-strip">
+                <strong>演示参考价</strong>
+                <span>需商务核价，不得直接作为正式报价；不含税费、折扣、运费或总价。</span>
+              </div>
+              <div class="solution-layout">
+                <section>
+                  <div class="section-heading">
+                    <div>
+                      <p class="eyebrow">DETERMINISTIC MATCH</p>
+                      <h3>候选方案</h3>
+                    </div>
+                    <span class="catalog-version" id="catalogVersion"></span>
+                  </div>
+                  <div class="solution-cards" id="solutionCards"></div>
+                  <div class="conflict-list" id="conflictList"></div>
+                </section>
+                <aside class="panel-card reply-card">
+                  <div class="card-heading">
+                    <div>
+                      <p class="eyebrow">REPLY DRAFT</p>
+                      <h3>客户回复文案</h3>
+                    </div>
+                    <button class="button compact ghost" id="copyReplyButton" type="button">复制</button>
+                  </div>
+                  <pre id="responseText"></pre>
+                </aside>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="panel-evidence">
+              <div class="evidence-grid">
+                <div class="stack">
+                  <article class="panel-card">
+                    <div class="card-heading">
+                      <div><p class="eyebrow">KNOWLEDGE</p><h3>知识库证据</h3></div>
+                    </div>
+                    <div id="knowledgeEvidence"></div>
+                  </article>
+                  <article class="panel-card">
+                    <div class="card-heading">
+                      <div><p class="eyebrow">AUDIT TRAIL</p><h3>审计记录</h3></div>
+                    </div>
+                    <div class="audit-list" id="auditList"></div>
+                  </article>
+                </div>
+                <aside class="panel-card approval-card">
+                  <p class="eyebrow">WORKFLOW</p>
+                  <h3>销售确认与工程审批</h3>
+                  <div class="workflow-steps" id="workflowSteps"></div>
+                  <label class="field-label" for="approvalComment">审批意见</label>
+                  <textarea id="approvalComment" rows="4" placeholder="可填写确认条件、复核意见或驳回原因"></textarea>
+                  <div class="approval-actions">
+                    <button class="button primary" id="salesConfirmButton" type="button">销售确认需求</button>
+                    <button class="button danger" id="rejectButton" type="button">驳回方案</button>
+                    <button class="button success" id="approveButton" type="button">工程批准</button>
+                  </div>
+                  <p class="microcopy">需求被再次修改后，当前修订的确认与审批将自动失效。</p>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="createDialog" class="modal">
+      <form method="dialog" class="modal-card" id="createForm">
+        <div class="modal-heading">
+          <div><p class="eyebrow">NEW RFQ</p><h2>新建询价</h2></div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
+        </div>
+        <label class="field-label" for="newRequestText">客户询价原文</label>
+        <textarea id="newRequestText" rows="8" placeholder="例如：需要 2 台泵，30 m³/h、30 m、380 V，月底交付。"></textarea>
+        <div class="example-box">
+          <strong>建议保留客户原话</strong>
+          <span>模型只负责字段抽取；产品和价格始终由结构化目录与确定性规则提供。</span>
+        </div>
+        <div class="modal-actions">
+          <button class="button ghost" value="cancel" type="submit">取消</button>
+          <button class="button primary" id="createSubmitButton" value="default" type="submit">创建并分析</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="catalogDialog" class="modal">
+      <form method="dialog" class="modal-card compact-modal" id="catalogForm">
+        <div class="modal-heading">
+          <div><p class="eyebrow">CATALOG</p><h2>产品目录</h2></div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
+        </div>
+        <div class="catalog-callout">
+          <div class="catalog-icon" aria-hidden="true">XLSX</div>
+          <div>
+            <strong>固定列产品目录</strong>
+            <p>首次启动已写入 5 个明确标记为虚构的演示型号。导入会原子切换到新目录版本。</p>
+          </div>
+        </div>
+        <button class="button ghost full" id="downloadTemplateButton" type="button">下载 Excel 模板</button>
+        <label class="upload-zone" for="catalogInput">
+          <span>选择填写后的 .xlsx 文件</span>
+          <small>校验全部通过后才会生效</small>
+          <input id="catalogInput" type="file" accept=".xlsx" />
+        </label>
+        <div class="modal-actions">
+          <button class="button ghost" value="cancel" type="submit">关闭</button>
+          <button class="button primary" id="catalogImportButton" type="button" disabled>校验并导入</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="loading-layer hidden" id="loadingLayer" aria-live="polite">
+      <div class="spinner"></div><span id="loadingText">处理中…</span>
+    </div>
+    <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+    <script src="/api/plugin/page/bridge-sdk.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

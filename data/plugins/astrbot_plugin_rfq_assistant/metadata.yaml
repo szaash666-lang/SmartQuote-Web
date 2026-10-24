@@ -1,0 +1,10 @@
+name: astrbot_plugin_rfq_assistant
+display_name: 询价选型助手
+short_desc: 从不完整询价中提取参数、比较离心泵方案并完成双人审批。
+description: 面向销售与工程师的离心泵询价澄清、确定性选型和参考价格协作工作台。
+version: 0.1.0
+author: Local Prototype
+astrbot_version: ">=4.29.1,<5"
+views:
+  - name: workbench
+    title: 询价选型工作台

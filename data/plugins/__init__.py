@@ -1,0 +1,1 @@
+"""Locally installed AstrBot plugins."""

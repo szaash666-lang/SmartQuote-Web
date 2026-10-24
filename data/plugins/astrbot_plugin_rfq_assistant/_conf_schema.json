@@ -1,0 +1,16 @@
+{
+  "analysis_provider_id": {
+    "type": "string",
+    "description": "需求结构化提取模型",
+    "hint": "工作台分析使用该模型；聊天场景未选择时会尝试使用当前会话模型。",
+    "default": "",
+    "_special": "select_provider"
+  },
+  "knowledge_base_names": {
+    "type": "list",
+    "description": "产品资料知识库",
+    "hint": "可选。只用于补充手册和历史案例证据，不参与价格计算。",
+    "default": [],
+    "_special": "select_knowledgebase"
+  }
+}
