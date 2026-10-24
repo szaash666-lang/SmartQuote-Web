@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0D4290"/>
+      <stop offset="0.55" stop-color="#0A2E5E"/>
+      <stop offset="1" stop-color="#061B40"/>
+    </linearGradient>
+    <linearGradient id="w1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4C9BE8" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#4C9BE8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="w2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2E7CC4" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#2E7CC4" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="w3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#79B4EE" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#79B4EE" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sea)"/>
+  <path d="M0 360 C 240 260, 480 460, 720 380 C 960 300, 1200 470, 1440 400 C 1680 330, 1800 430, 1920 380 L 1920 0 L 0 0 Z" fill="url(#w1)"/>
+  <path d="M0 600 C 320 480, 640 720, 960 620 C 1280 520, 1600 730, 1920 640 L 1920 0 L 0 0 Z" fill="url(#w2)"/>
+  <path d="M0 850 C 340 720, 680 990, 1020 880 C 1360 770, 1640 990, 1920 900 L 1920 0 L 0 0 Z" fill="url(#w3)"/>
+</svg>

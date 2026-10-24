@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 碎片化管理</title>
+<style>
+  :root{
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --border-soft:#E5E7EB;
+    --border-dash-import:#D1D5DB;
+    --text-dark:#1F2937;
+    --text-mid:#374151;
+    --text-gray:#6B7280;
+    --text-light:#9CA3AF;
+    --blue-bg:#E0F2FE;
+    --blue-text:#0284C7;
+    --accent-a:#4F46E5;
+    --accent-b:#3B82F6;
+    --shadow-card:0 4px 20px rgba(0,0,0,0.03);
+    --radius-card:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--text-dark);
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  svg{display:block}
+
+  .page{
+    max-width:1440px;
+    margin:0 auto;
+    padding:32px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    min-height:100vh;
+  }
+
+  /* ============ Header ============ */
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .header h1{
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:var(--text-dark);
+  }
+  /* ============ Card base ============ */
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-card);
+    box-shadow:var(--shadow-card);
+    padding:24px;
+  }
+
+  /* ============ Action panel ============ */
+  .action-panel{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .import-row{
+    display:flex;
+    gap:20px;
+  }
+  .import-box{
+    flex:1;
+    height:80px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    background:#FAFAFC;
+    border:2px dashed var(--border-dash-import);
+    border-radius:12px;
+    color:var(--text-gray);
+    font-size:14px;
+    cursor:pointer;
+    transition:.18s;
+  }
+  .import-box svg{width:24px;height:24px;color:var(--text-light)}
+  .import-box:hover{
+    border-style:solid;
+    border-color:var(--accent-b);
+    color:var(--accent-b);
+    background:#F5F8FF;
+  }
+  .import-box:hover svg{color:var(--accent-b)}
+
+  .btn-primary{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    height:48px;
+    border-radius:10px;
+    background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    box-shadow:0 4px 14px rgba(59,130,246,0.4);
+    transition:.15s;
+  }
+  .btn-primary:hover{filter:brightness(1.05);box-shadow:0 6px 18px rgba(59,130,246,0.5)}
+  .btn-primary svg{width:18px;height:18px}
+
+  /* ============ Workspace grid ============ */
+  .workspace{
+    display:grid;
+    grid-template-columns:minmax(0,65fr) minmax(0,35fr);
+    gap:24px;
+    align-items:stretch;
+  }
+
+  .card-title{
+    font-size:18px;
+    font-weight:600;
+    color:var(--text-dark);
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    height:22px;
+    padding:0 7px;
+    background:var(--blue-bg);
+    color:var(--blue-text);
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+  }
+
+  /* ---------- Left: source list ---------- */
+  .list-card{display:flex;flex-direction:column}
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    height:400px;
+    overflow-y:auto;
+    padding-right:6px;
+  }
+  .list::-webkit-scrollbar{width:6px}
+  .list::-webkit-scrollbar-track{background:transparent}
+  .list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:999px}
+  .list::-webkit-scrollbar-thumb:hover{background:#D1D5DB}
+
+  .item{
+    background:#F9FAFB;
+    border-radius:12px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:.15s;
+  }
+  .item:hover{background:#F3F4F6}
+
+  .item-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tag{
+    flex:0 0 auto;
+    font-size:12px;
+    font-weight:500;
+    color:var(--blue-text);
+    background:var(--blue-bg);
+    border-radius:4px;
+    padding:2px 8px;
+    line-height:1.4;
+  }
+  .item-client{
+    font-weight:600;
+    color:var(--text-dark);
+    font-size:14px;
+  }
+  .item-time{
+    margin-left:auto;
+    font-size:12px;
+    color:var(--text-light);
+  }
+  .item-body{
+    font-size:14px;
+    color:var(--text-mid);
+    line-height:1.5;
+  }
+  .item-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .pill{
+    font-size:12px;
+    color:var(--blue-text);
+    background:var(--blue-bg);
+    padding:4px 12px;
+    border-radius:999px;
+    line-height:1.4;
+  }
+
+  /* ---------- Right: structured result (tree view) ---------- */
+  .result-card{display:flex;flex-direction:column}
+  .tree{
+    flex:1;
+    overflow-y:auto;
+    padding-right:4px;
+    min-height:320px;
+  }
+  .tree::-webkit-scrollbar{width:6px}
+  .tree::-webkit-scrollbar-track{background:transparent}
+  .tree::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:999px}
+  .tree::-webkit-scrollbar-thumb:hover{background:#D1D5DB}
+
+  .tree-children{
+    padding-left:22px;
+    position:relative;
+  }
+  .tree-children::before{
+    content:"";
+    position:absolute;
+    left:7px;
+    top:2px;
+    bottom:12px;
+    width:1px;
+    border-left:1px dashed #E5E7EB;
+  }
+  .tree-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:36px;
+    padding:0 10px;
+    border-radius:6px;
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+    transition:background .12s;
+  }
+  .tree-row:hover{background:#F3F4F6}
+  .tree-row.selected{background:#EFF6FF}
+  .tree-row.selected .tree-label{color:#1D4ED8;font-weight:500}
+  .tree-label{
+    font-size:14px;
+    color:#374151;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .tree-caret{
+    flex:0 0 16px;
+    width:16px;height:16px;
+    display:flex;align-items:center;justify-content:center;
+    color:#9CA3AF;
+    transition:transform .15s;
+  }
+  .tree-caret svg{width:8px;height:8px}
+  .tree-caret.open{transform:rotate(90deg)}
+  .tree-caret.leaf{visibility:hidden}
+  .tree-icon{
+    flex:0 0 16px;
+    width:16px;height:16px;
+    color:#3B82F6;
+  }
+  .tree-icon.file{color:#94A3B8}
+
+  @media(max-width:900px){
+    .workspace{grid-template-columns:1fr}
+    .import-row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ Header ============ -->
+  <header class="header">
+    <h1>AI 碎片化管理</h1>
+  </header>
+
+  <!-- ============ Action panel ============ -->
+  <section class="card action-panel">
+    <div class="import-row">
+      <div class="import-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        聊天消息
+      </div>
+      <div class="import-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Excel 表格
+      </div>
+      <div class="import-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        PDF 文档
+      </div>
+    </div>
+    <button class="btn-primary">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.2L20 10l-5.8 1.8L12 18l-2.2-6.2L4 10l5.8-1.8z"/></svg>
+      一键整理归纳
+    </button>
+  </section>
+
+  <!-- ============ Workspace ============ -->
+  <section class="workspace">
+    <!-- Left: source list -->
+    <div class="card list-card">
+      <div class="card-title">碎片来源 <span class="count">5</span></div>
+      <div class="list">
+        <div class="item">
+          <div class="item-head">
+            <span class="tag">消息</span>
+            <span class="item-client">客户 · 王经理</span>
+            <span class="item-time">09:12</span>
+          </div>
+          <div class="item-body">我们要两台泵，流量 40 方左右，介质是清水，扬程大概 32 米，麻烦报个价。</div>
+          <div class="item-tags">
+            <span class="pill">数量 2 台</span>
+            <span class="pill">介质 清水</span>
+            <span class="pill">流量 40 m³/h</span>
+            <span class="pill">扬程 32 m</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="item-head">
+            <span class="tag">消息</span>
+            <span class="item-client">客户 · 李工</span>
+            <span class="item-time">09:05</span>
+          </div>
+          <div class="item-body">采购 3 台离心泵，介质是弱酸性液体，材质要 304 不锈钢，出口压力不低于 0.5 MPa。</div>
+          <div class="item-tags">
+            <span class="pill">数量 3 台</span>
+            <span class="pill">介质 弱酸性</span>
+            <span class="pill">材质 304</span>
+            <span class="pill">压力 0.5 MPa</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="item-head">
+            <span class="tag">Excel</span>
+            <span class="item-client">客户 · 张总</span>
+            <span class="item-time">08:48</span>
+          </div>
+          <div class="item-body">表格里有 5 个型号的需求，功率从 7.5kW 到 55kW，请按行逐项整理出对应选型建议。</div>
+          <div class="item-tags">
+            <span class="pill">型号 5 个</span>
+            <span class="pill">功率 7.5–55 kW</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="item-head">
+            <span class="tag">PDF</span>
+            <span class="item-client">供应商 · 刘经理</span>
+            <span class="item-time">08:30</span>
+          </div>
+          <div class="item-body">PDF 技术协议共 12 页，含安装尺寸与法兰标准，需要提取关键参数做对比报价。</div>
+          <div class="item-tags">
+            <span class="pill">页数 12</span>
+            <span class="pill">法兰 标准</span>
+            <span class="pill">安装尺寸</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="item-head">
+            <span class="tag">消息</span>
+            <span class="item-client">客户 · 陈工</span>
+            <span class="item-time">08:15</span>
+          </div>
+          <div class="item-body">现场工况温度偏高，约 90℃，需要耐高温机封，流量 25 方每小时，一台即可。</div>
+          <div class="item-tags">
+            <span class="pill">数量 1 台</span>
+            <span class="pill">温度 90 ℃</span>
+            <span class="pill">流量 25 m³/h</span>
+            <span class="pill">耐高温机封</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: structured result (tree view) -->
+    <div class="card result-card">
+      <div class="card-title">整理结果 · 结构化数据</div>
+      <div class="tree">
+
+        <div class="tree-row">
+          <span class="tree-caret open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span class="tree-label">离心泵</span>
+        </div>
+        <div class="tree-children">
+
+          <div class="tree-row selected">
+            <span class="tree-caret open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span class="tree-label">王经理-XX水务</span>
+          </div>
+          <div class="tree-children">
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+              <span class="tree-label">需求参数.json</span>
+            </div>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span class="tree-label">沟通记录.md</span>
+            </div>
+          </div>
+
+          <div class="tree-row">
+            <span class="tree-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span class="tree-label">李工-YY化工厂</span>
+          </div>
+          <div class="tree-children" hidden>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+              <span class="tree-label">需求参数.json</span>
+            </div>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span class="tree-label">沟通记录.md</span>
+            </div>
+          </div>
+
+          <div class="tree-row">
+            <span class="tree-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span class="tree-label">陈工-ZZ化工</span>
+          </div>
+          <div class="tree-children" hidden>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+              <span class="tree-label">需求参数.json</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="tree-row">
+          <span class="tree-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span class="tree-label">多级泵</span>
+        </div>
+        <div class="tree-children" hidden>
+          <div class="tree-row">
+            <span class="tree-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span class="tree-label">张总-XX市政</span>
+          </div>
+          <div class="tree-children" hidden>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+              <span class="tree-label">需求参数.json</span>
+            </div>
+            <div class="tree-row">
+              <span class="tree-caret leaf"></span>
+              <svg class="tree-icon file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              <span class="tree-label">报价单.xlsx</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.querySelectorAll('.tree-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      document.querySelectorAll('.tree-row').forEach(function(r){ r.classList.remove('selected'); });
+      row.classList.add('selected');
+
+      var children = row.nextElementSibling;
+      var hasChildren = children && children.classList.contains('tree-children');
+      if(hasChildren){
+        var caret = row.querySelector('.tree-caret');
+        var open = caret.classList.toggle('open');
+        children.hidden = !open;
+      }
+    });
+  });
+</script>
+</body>
+</html>

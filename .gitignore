@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+
+# Local login token and dashboard credentials
+sq-boot.txt
+data/cmd_config.json
