@@ -267,11 +267,3 @@ pnpm build
 - [AstrBot 上游仓库](https://github.com/AstrBotDevs/AstrBot)
 
 本仓库沿用 [GNU AGPL v3 or later](LICENSE) 许可证。发布或部署修改版本时，请遵守许可证中的源代码公开义务。
-
-## 声明
-
-> [!IMPORTANT]
-> 这是基于 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 4.29.1 改造的独立 Plugin Edition，不是 AstrBot 官方发行版。本仓库保留 AstrBot 的多平台消息、模型、插件、知识库与 Agent 能力，并增加了固定三入口 Dashboard 和工业离心泵询价工作台。
-
-> [!WARNING]
-> 所有内置价格均为虚构演示参考价。系统不计算小计、总计、税费、折扣或运费，也不会自动向客户发送报价。所有导出文件均标注：**演示参考价，需商务核价，不得直接作为正式报价。**
